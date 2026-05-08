@@ -25,7 +25,7 @@ use schematic::schema::{SchemaGenerator, TypeScriptRenderer, YamlTemplateRendere
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection};
 use sea_orm_migration::MigratorTrait;
 use supporting_service::JobStorage;
-#[cfg(not(target_env = "msvc"))]
+#[cfg(all(not(target_env = "msvc"), target_arch = "x86_64"))]
 use tikv_jemallocator::Jemalloc;
 use tokio::{
     join,
@@ -48,11 +48,13 @@ mod job;
 static LOGGING_ENV_VAR: &str = "RUST_LOG";
 static BASE_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
-#[cfg(not(target_env = "msvc"))]
+#[cfg(all(not(target_env = "msvc"), target_arch = "x86_64"))]
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-fn make_job_storage<T: Send + 'static>() -> (Arc<Mutex<Option<MemoryStorage<T>>>>, JobStorage<T>) {
+type JobStoragePair<T> = (Arc<Mutex<Option<MemoryStorage<T>>>>, JobStorage<T>);
+
+fn make_job_storage<T: Send + 'static>() -> JobStoragePair<T> {
     let (sender, receiver) = unbounded();
     let sender = Box::new(sender);
     let sender = MemorySink::new(Arc::new(FuturesMutex::new(sender)));

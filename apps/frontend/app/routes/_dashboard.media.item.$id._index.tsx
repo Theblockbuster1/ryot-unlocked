@@ -80,6 +80,7 @@ import {
 import {
 	MarkEntityAsPartialMenuItem,
 	ToggleMediaMonitorMenuItem,
+	WebSearchMenuItem,
 } from "~/components/media/menu-items";
 import {
 	JUST_WATCH_URL,
@@ -231,7 +232,7 @@ const editSeenItem = z.object({
 	showEpisodeNumber: z.coerce.number().optional(),
 	animeEpisodeNumber: z.coerce.number().optional(),
 	podcastEpisodeNumber: z.coerce.number().optional(),
-	providersConsumedOn: z.array(z.string()).optional(),
+	providersConsumedOn: z.array(z.string()).transform((a) => a.filter(Boolean)),
 });
 
 export default function Page() {
@@ -965,6 +966,7 @@ export default function Page() {
 													entityLot={EntityLot.Metadata}
 													entityId={loaderData.metadataId}
 												/>
+												<WebSearchMenuItem title={title} />
 											</Menu.Dropdown>
 										</Menu>
 										{metadataDetails.data && (
